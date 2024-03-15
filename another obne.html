@@ -1,0 +1,20 @@
+const fs = require('fs');
+const Discord = require('discord.js');
+const { registerCommands, registerEvents } = require('./utils/registry');
+
+const client = new Discord.Client();
+
+client.commands = new Discord.Collection();
+client.cooldowns = new Discord.Collection();
+
+const token = 'YOUR_TOKEN_HERE';
+
+registerCommands(client, '../cmds');
+registerEvents(client, '../events');
+
+client.once('ready', () => {
+  console.log(`${client.user.username} is cooking`);
+  client.user.setActivity('tess runs this');
+});
+
+client.login(token);
