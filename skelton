@@ -1,0 +1,86 @@
+bot.js:
+
+
+
+
+const fs = require('fs');
+const Discord = require('discord.js');
+const { Client, Intents } = Discord;
+const { registerCommands, registerEvents } = require('./utils/registry');
+
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+
+client.commands = new Discord.Collection();
+client.cooldowns = new Discord.Collection();
+
+const token = 'YOUR_TOKEN_HERE';
+
+registerCommands(client, '../cmds');
+registerEvents(client, '../events');
+
+client.once('ready', () => {
+  console.log('${client.user.username} is cooking');
+  client.user.setActivity('tess runs this', { type: 'STREAMING', url: 'your stream URL here' });
+});
+
+client.login(token);
+
+
+
+
+
+
+
+
+
+
+
+NAME THIS ´ready.js´ INSIDE THER ´event´ FOLDER:
+
+module.exports = {
+  name: 'ready',
+  once: true,
+  execute(client) {
+    console.log(`Logged in as ${client.user.tag}`);
+  },
+};
+
+
+
+
+
+
+
+
+
+/create a utils/registry.js file to handle the registration of commands and events:
+
+
+
+
+const fs = require('fs');
+
+module.exports = {
+  registerCommands(client, dir) {
+    const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+
+    for (const file of commandFiles) {
+      const command = require(`${dir}/${file}`);
+      client.commands.set(command.name, command);
+    }
+  },
+
+  registerEvents(client, dir) {
+    const eventFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+
+    for (const file of eventFiles) {
+      const event = require(`${dir}/${file}`);
+      if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args, client));
+      } else {
+        client.on(event.name, (...args) => event.execute(...args, client));
+      }
+    }
+  },
+};
+
